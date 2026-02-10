@@ -1,110 +1,13 @@
-# datatalk_module1
-for learning purposes only
+# Data Pipeline Simple
 
-install Docker first
+this is a data pipeline where you will store datasets in CSV or prequet format into the data folder and run the service data_ingest to load data into postgresql db you can check data using container based pg admin as well
 
-# question 1
+useful commands to run this pipeline
 
-          docker run -it --rm --entrypoint bash python:3.13
-
-What this does:
-
--it → interactive terminal
-
---rm → container auto-deletes after exit
-
---entrypoint bash → overrides default python entrypoint
-
-python:3.13 → the image required
-
-              
-              pip --version
-
-# question 2
-      
-Build a docker container with pgadmin 
-```
-services:
-  db:
-    container_name: postgres
-    image: postgres:17-alpine
-    environment:
-      POSTGRES_USER: 'postgres'
-      POSTGRES_PASSWORD: 'postgres'
-      POSTGRES_DB: 'ny_taxi'
-    ports:
-      - '5433:5432'
-    volumes:
-      - vol-pgdata:/var/lib/postgresql/data
-
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4:latest
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "pgadmin@pgadmin.com"
-      PGADMIN_DEFAULT_PASSWORD: "pgadmin"
-    ports:
-      - "8080:80"
-    volumes:
-      - vol-pgadmin_data:/var/lib/pgadmin
-
-volumes:
-  vol-pgdata:
-    name: vol-pgdata
-  vol-pgadmin_data:
-    name: vol-pgadmin_data
-
-```
-
-Answer: postgres:5432
-
-        db:5432
+docker compose up -d --build
+docker logs data_ingest
 
 
-Login:
+Access pgAdmin: Go to http://localhost:5050 in your browser. Login with pgadmin@pgadmin.com / pgadmin.
 
-Email: pgadmin@pgadmin.com
-
-Password: pgadmin
-
-pgadmin credentials
-Host name / address: db
-
-Port: 5432
-
-Username: postgres
-
-Password: postgres
-
-
-Mount data into DB
-add data folder in volume of docker container to create an easy pipeline we will also need Python and SQLAlchemy 
-```
- db:
-    image: postgres:17-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: ny_taxi
-    ports:
-      - "5433:5432"
-    volumes:
-      - vol-pgdata:/var/lib/postgresql/data
-      - ./data:/data
-```      
-
-
-
-as i am using container based system and don't want to pressurise my local machine, i have created container based python system 
-
-docker pull python:3.13
-
- docker run -it --rm -v ${PWD}:/app -w /app python:3.13 bash
-
-
- after this i will run my python scripts.
- before that, we need to install dependencies
-
- pip install pandas pyarrow sqlalchemy psycopg2-binary
-
-remember i am inside the container, my local machine doesn't have any issues.
+To connect to the DB: Use host db, port 5432, user postgres.

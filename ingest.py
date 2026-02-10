@@ -1,32 +1,40 @@
+import os
 import pandas as pd
 from sqlalchemy import create_engine
 
-engine = create_engine(
-    "postgresql://postgres:postgres@localhost:5433/ny_taxi"
-)
+# Use the environment variable set in docker-compose
+DB_URL = os.getenv("DB_URL", "postgresql://postgres:postgres@db:5432/ny_taxi")
+engine = create_engine(DB_URL)
 
-# ---------- Green taxi trips (Parquet) ----------
-print("Loading green taxi data...")
-df_green = pd.read_parquet("data/green_tripdata_2025-11.parquet")
+def ingest_data():
+    data_dir = "./data"
+    if not os.path.exists(data_dir):
+        print(f"Error: {data_dir} folder not found.")
+        return
 
-df_green.to_sql(
-    "green_tripdata",
-    engine,
-    if_exists="replace",
-    index=False
-)
+    for file in os.listdir(data_dir):
+        file_path = os.path.join(data_dir, file)
+        table_name = os.path.splitext(file)[0] # e.g., 'taxi_data' from 'taxi_data.csv'
+        ext = os.path.splitext(file)[1].lower()
 
-print("Green taxi data loaded")
+        try:
+            print(f"Processing {file}...")
+            if ext == '.csv':
+                df = pd.read_csv(file_path)
+            elif ext == '.parquet':
+                df = pd.read_parquet(file_path)
+            elif ext in ['.xls', '.xlsx']:
+                df = pd.read_excel(file_path)
+            else:
+                print(f"Skipping unsupported format: {ext}")
+                continue
 
-# ---------- Taxi zones (CSV) ----------
-print("Loading taxi zones...")
-df_zones = pd.read_csv("data/taxi_zone_lookup.csv")
+            # Load into SQL
+            df.to_sql(table_name, engine, if_exists='replace', index=False)
+            print(f"Successfully loaded {file} into table '{table_name}'")
+            
+        except Exception as e:
+            print(f"Failed to process {file}: {e}")
 
-df_zones.to_sql(
-    "taxi_zone_lookup",
-    engine,
-    if_exists="replace",
-    index=False
-)
-
-print("Taxi zones loaded")
+if __name__ == "__main__":
+    ingest_data()
