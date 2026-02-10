@@ -61,6 +61,22 @@ Answer: postgres:5432
         db:5432
 
 
+Login:
+
+Email: pgadmin@pgadmin.com
+
+Password: pgadmin
+
+pgadmin credentials
+Host name / address: db
+
+Port: 5432
+
+Username: postgres
+
+Password: postgres
+
+
 Mount data into DB
 add data folder in volume of docker container to create an easy pipeline we will also need Python and SQLAlchemy 
 ```
@@ -77,3 +93,18 @@ add data folder in volume of docker container to create an easy pipeline we will
       - ./data:/data
 ```      
 
+
+
+as i am using container based system and don't want to pressurise my local machine, i have created container based python system 
+
+docker pull python:3.13
+
+ docker run -it --rm -v ${PWD}:/app -w /app python:3.13 bash
+
+
+ after this i will run my python scripts.
+ before that, we need to install dependencies
+
+ pip install pandas pyarrow sqlalchemy psycopg2-binary
+
+remember i am inside the container, my local machine doesn't have any issues.
